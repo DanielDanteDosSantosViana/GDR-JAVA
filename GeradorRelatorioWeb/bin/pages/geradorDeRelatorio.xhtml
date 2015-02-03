@@ -1,0 +1,676 @@
+<ui:composition xmlns:ui="http://java.sun.com/jsf/facelets" 
+                xmlns:h="http://java.sun.com/jsf/html" 
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:a4j="http://richfaces.org/a4j"
+    			xmlns:rich="http://richfaces.org/rich">
+	
+	<h:panelGroup id="entidades">
+	
+		<div><h3>Tabelas :</h3></div>
+		
+		<div style="margin-top: 10px">
+			<div style="float: left; width: 210px;">
+				<div>
+					Tabela
+				</div>
+				<div>
+					<h:selectOneMenu
+						id="entidadeOriginal"
+						style="width: 200px;"
+						disabled="#{geradorDeRelatorio.disabled('RELACIONAMENTOS')}"
+						value="#{geradorDeRelatorio.form.entidadeOrigem}">
+						<f:converter converterId="selectItemConversorGR"/>
+						<f:selectItems value="#{geradorDeRelatorio.form.entidadesOrigem}" />
+						<f:ajax execute="entidadeOriginal" render="@all" listener="#{geradorDeRelatorio.adicionarRelacionamento()}" />
+					</h:selectOneMenu>
+				</div>
+			</div>	
+			
+			<a4j:repeat
+				var="entidade"
+				rowKeyVar="index"
+				value="#{geradorDeRelatorio.form.entidadesView}">
+				<div style="float: left; width: 210px;">
+					<div>
+						Relacionamento
+						<h:outputText value="#{index + 1}"/>
+					</div>
+					<div>
+						<h:selectOneMenu
+							id="relacionamento"
+							style="width: 200px;"
+							disabled="#{geradorDeRelatorio.disabled('RELACIONAMENTOS')}"
+							value="#{entidade.entidadeSelecionada}">
+							<f:converter converterId="selectItemConversorGR"/>
+							<f:selectItems value="#{entidade.entidades}"/>
+							<f:ajax execute="relacionamento" render="@all" listener="#{geradorDeRelatorio.adicionarRelacionamento(index)}" />
+						</h:selectOneMenu>
+					</div>
+				</div>
+			</a4j:repeat>
+		</div>
+		
+		<div style="clear:both;" />
+		
+		<div style="margin-top: 10px;">
+			<a4j:commandButton
+				action="#{geradorDeRelatorio.habilitarSelecao()}"
+				value="Habilitar Selecao"
+				disabled="#{geradorDeRelatorio.disabled('BTT_HABILITAR_SELECAO')}" 
+				render="@all">
+				
+			</a4j:commandButton>
+			<a4j:commandButton
+				action="#{geradorDeRelatorio.confirmarSelecao()}"
+				disabled="#{geradorDeRelatorio.disabled('BTT_CONFIRMAR_SELECAO')}"
+				value="Confirmar Selecao" 
+				render="@all">
+				
+			</a4j:commandButton>
+		</div>
+		
+	</h:panelGroup>
+	
+	<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_CAMPOS_CONSULTA')}">
+		<div style="margin-top: 10px;">
+			<div><h3>Campos Retorno :</h3></div>
+		</div>
+		
+		<div>
+			<h:selectBooleanCheckbox id="todosOsCampos" value="#{geradorDeRelatorio.form.todosOsCampos}">
+				<f:ajax execute="todosOsCampos" render="@all" listener="#{geradorDeRelatorio.selecionarTodosOsCampos()}"/>
+			</h:selectBooleanCheckbox>
+			Selecionar todos os campos
+		</div>
+		
+		<h:panelGroup rendered="#{geradorDeRelatorio.rendered('ADICIONAR_CAMPOS_AVANCADOS')}" style="margin-top: 10px;">
+			<h:selectBooleanCheckbox id="camposAvancados" value="#{geradorDeRelatorio.form.adicionarCamposAvancados}" >
+				<f:ajax execute="camposAvancados" render="@all" listener="#{geradorDeRelatorio.iniciarCamposConsulta()}" />
+			</h:selectBooleanCheckbox>
+			Adicionar campos avancados
+		</h:panelGroup>
+		
+		<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_CAMPOS')}" style="margin-top: 10px;">
+			<a4j:repeat
+				var="campo"
+				rowKeyVar="index"
+				value="#{geradorDeRelatorio.form.camposConsulta}">
+				
+				<div style="margin: 10px 0">
+					<div>
+						<h:outputText value="#{index + 1})Campo Simples"/>
+						
+					</div>
+					<h:selectOneRadio id="campoAvancado" value="#{campo.avancado}">
+						<f:selectItem itemLabel="Sim" itemValue="false" itemDisabled="#{geradorDeRelatorio.disabled('CAMPOS_SIMPLES')}" />
+						<f:selectItem itemLabel="Nao" itemValue="true" itemDisabled="#{geradorDeRelatorio.disabled('CAMPOS_AVANCADOS')}" />
+						<f:ajax execute="campoAvancado" render="@all" listener="#{geradorDeRelatorio.selecionarTipoCampo(index)}" />
+		            </h:selectOneRadio>
+					
+					<div style="float: left; width: 1100px; margin: 10px 0">
+						<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_CAMPOS_SIMPLES', campo)}">
+							<div style="float: left; width: 210px;">
+								<div>
+									Campo *
+								</div>
+								<div>
+									<h:selectOneMenu
+										id="campo"
+										style="width: 200px;"
+										value="#{campo.camposSelecionado}">
+										<f:converter converterId="selectItemConversorGR"/>
+										<f:selectItems value="#{geradorDeRelatorio.form.camposView}" />
+										<f:ajax execute="campo" render="@all" listener="#{geradorDeRelatorio.selecionarCampo(index)}"/>
+									</h:selectOneMenu>
+								</div>
+							</div>
+							
+							<div style="float: left; width: 210px;">
+								<div>
+									Mascara Campo
+								</div>
+								<div>
+									<h:selectOneMenu
+										id="mascara"
+										style="width: 200px;"
+										disabled="#{geradorDeRelatorio.disabled('INPUT_MASCARA', campo)}"
+										value="#{campo.mascara}">
+										<f:converter converterId="selectItemConversorGR"/>
+										<f:selectItems value="#{geradorDeRelatorio.form.mascarasRetorno}" />
+										<f:ajax execute="mascara" render="@all" />
+									</h:selectOneMenu>
+								</div>
+							</div>
+							
+							<div style="float: left; width: 210px;">
+								<div>
+									Apelido Campo *
+								</div>
+								<div>
+									<h:inputText
+										style="width: 200px;"
+										maxlength="30"
+										disabled="#{geradorDeRelatorio.disabled('INPUT_LABEL', campo)}"
+										id="apelido"
+			 							value="#{campo.apelido}">
+										<f:ajax execute="apelido" render="@all" event="change"/>
+									</h:inputText>
+								</div>
+							</div>
+							
+						</h:panelGroup>
+						
+						<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_CAMPOS_AVANCADO', campo)}">
+							
+							<div style="float: left; margin-top: 5px">
+								
+								<div>
+									<div style="float: left; width: 100px;">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.limparConsultaAvancada(campo)}"
+											value="Limpar Formula" 
+											style=" margin-top: 12px"
+											disabled="#{geradorDeRelatorio.disabled('BTT_LIMPAR_CONSULTA_AVANCADO',campo)}"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 115px;">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.desfazerConsultaAvancada(campo)}"
+											value="Desfazer Formula" 
+											style=" margin-top: 12px"
+											disabled="#{geradorDeRelatorio.disabled('BTT_DESFAZER_CONSULTA_AVANCADO',campo)}"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 110px;">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.refazerConsultaAvancada(campo)}"
+											value="Refazer Formula"
+											style=" margin-top: 12px"
+											disabled="#{geradorDeRelatorio.disabled('BTT_REFAZER_CONSULTA_AVANCADO',campo)}"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+								</div>
+								
+								<div style="clear:both;" />
+							
+								<div>
+									<div style="float: left; width: 210px; margin-top: 5px">
+										<div>
+											Valor
+										</div>
+										<div>
+											<h:inputText
+												id="valorMutavelConsultaAvancado"
+												style="width: 200px;"
+												value="#{campo.valorMutavelConsultaAvancado}"
+												disabled="#{geradorDeRelatorio.disabled('TXT_VALOR_MUTAVEL_CONSULTA_AVANCADO',campo)}">
+											 	<f:converter converterId="integerConversorGR"/>
+												<f:ajax execute="valorMutavelConsultaAvancado" render="@all" />
+											</h:inputText>
+										</div>
+									</div>
+									<div style="float: left; width: 210px;">
+										<div>
+											<h:selectOneMenu
+												id="campoConsultaAvancada"
+												style="width: 200px; margin-top: 23px;"
+												disabled="#{geradorDeRelatorio.disabled('TXT_CAMPO_CONSULTA_AVANCADO',campo)}"
+												value="#{campo.campoConsultaAvancada}">
+												<f:converter converterId="selectItemConversorGR"/>
+												<f:selectItems value="#{geradorDeRelatorio.form.camposNumericosView}" />
+												<f:ajax execute="campoConsultaAvancada" render="@all" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+									<div style="float: left; width: 120px; margin-left: 10px">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.adicionarItemFormulaConsultaAvencada(campo)}"
+											value="Adicionar Valor" 
+											disabled="#{geradorDeRelatorio.disabled('BTT_ADICIONAR_VALOR',campo)}"
+											style="margin-top: 17px; width: 100px;"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 210px;">
+										<div>
+											Operador
+										</div>
+										<div>
+											<h:selectOneMenu
+												id="operadorConsultaAvancada"
+												style="width: 200px;"
+												disabled="#{geradorDeRelatorio.disabled('TXT_OPERADOR_CONSULTA_AVANCADO',campo)}"
+												value="#{campo.operadorCaonsultaAvancado}">
+												<f:converter converterId="selectItemConversorGR"/>
+												<f:selectItems value="#{geradorDeRelatorio.form.operadoresConsultaAvancada}" />
+												<f:ajax execute="operadorConsultaAvancada" render="@all" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+									<div style="float: left; width: 120px; margin-left: 10px">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.adicionarItemFormulaConsultaAvencada(campo)}"
+											value="Adicionar Operador" 
+											disabled="#{geradorDeRelatorio.disabled('BTT_OPERADOR_CONSULTA_AVANCADO',campo)}"
+											style="margin-top: 17px"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 20px; margin-left: 10px">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.adicionarItemFormulaConsultaAvencada(campo)}"
+											value="(" 
+											disabled="#{geradorDeRelatorio.disabled('BTT_ABRIR_PARENTESES',campo)}"
+											style="margin-top: 17px"
+											render="@all">
+											<f:setPropertyActionListener target="#{geradorDeRelatorio.form.abrirParenteses}" value="true"/>
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 20px; margin-left: 10px">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.adicionarItemFormulaConsultaAvencada(campo)}"
+											value=")" 
+											disabled="#{geradorDeRelatorio.disabled('BTT_FECHAS_PARENTESES',campo)}"
+											style="margin-top: 17px"
+											render="@all">
+											<f:setPropertyActionListener target="#{geradorDeRelatorio.form.fecharParenteses}" value="true"/>
+										</a4j:commandButton>
+									</div>
+								</div>
+								
+								<div style="clear:both;" />
+								
+								<div style="margin-top: 5px">
+									<div style="float: left; width: 420px;">
+										<div>
+											Funcoes
+										</div>
+										<div>
+											<h:selectOneMenu
+												id="funcoesConsultaAvancada"
+												style="width: 410px;"
+												disabled="#{geradorDeRelatorio.disabled('TXT_FUNCOES_CONSULTA_AVANCADO',campo)}"
+												value="#{campo.funcaoConsultaAvancado}">
+												<f:converter converterId="selectItemConversorGR"/>
+												<f:selectItems value="#{geradorDeRelatorio.form.funcoesConsultaAvancada}" />
+												<f:ajax execute="funcoesConsultaAvancada" render="@all" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+									<div style="float: left; width: 120px; margin-left: 10px">
+										<a4j:commandButton
+											action="#{geradorDeRelatorio.adicionarItemFormulaConsultaAvencada(campo)}"
+											value="Adicionar Funcao" 
+											disabled="#{geradorDeRelatorio.disabled('BTT_FUNCOES_CONSULTA_AVANCADO',campo)}"
+											style="margin-top: 17px"
+											render="@all">
+											
+										</a4j:commandButton>
+									</div>
+									<div style="float: left; width: 225px;">
+										<div>
+											Mascara Campo
+										</div>
+										<div>
+											<h:selectOneMenu
+												id="mascaraConsultaAvancada"
+												style="width: 200px;"
+												disabled="#{geradorDeRelatorio.disabled('INPUT_MASCARA', campo)}"
+												value="#{campo.mascara}">
+												<f:converter converterId="selectItemConversorGR"/>
+												<f:selectItems value="#{geradorDeRelatorio.form.mascarasRetorno}" />
+												<f:ajax execute="mascaraConsultaAvancada" render="@all" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+									<div style="float: left; width: 200px;">
+										<div>
+											Apelido Campo *
+										</div>
+										<div>
+											<h:inputText
+												style="width: 200px;"
+												maxlength="30"
+												disabled="#{geradorDeRelatorio.disabled('INPUT_LABEL', campo)}"
+					 							value="#{campo.apelido}">
+												<f:ajax execute="apelido" render="@all" event="change"/>
+											</h:inputText>
+										</div>
+									</div>
+								</div>
+								
+								<div style="clear:both;" />
+								
+								<div style="margin-top: 15px; width: 1000px; word-wrap: break-word;">
+									<div>
+										Formula Geral
+										<h:panelGroup rendered="#{geradorDeRelatorio.rendered('FORMULA_COM_ERRO', campo)}" style="color: #F00;">
+											<span>( <h:outputText value="#{campo.msgErroFormulaConsultaAvancado}" /> )</span>
+										</h:panelGroup>
+									</div>
+									<div>
+										<a4j:repeat
+											var="item"
+											value="#{campo.formula}">
+											<h:outputText value="#{item}"/>
+										</a4j:repeat>
+									</div>
+								</div>
+							</div>
+						</h:panelGroup>
+					
+						<div style="float: left; width: 20px; margin-left: 10px">
+							<a4j:commandButton
+								action="#{geradorDeRelatorio.removerCampoConsulta(index)}"
+								value="-" 
+								rendered="#{index != 0}"
+								title="Remover Campo"
+								style="margin-top: 17px"
+								render="@all">
+								
+							</a4j:commandButton>
+						</div>
+						
+						<div style="float: left; width: 20px; margin-left: 10px">
+							<a4j:commandButton
+								action="#{geradorDeRelatorio.addCampoConsulta()}"
+								value="+" 
+								rendered="#{geradorDeRelatorio.form.camposConsulta.size()-1 == index}"
+								disabled="#{geradorDeRelatorio.disabled('BTT_ADICIONAR', campo)}"
+								title="Adicionar Campo"
+								style="margin-top: 17px"
+								render="@all">
+								
+							</a4j:commandButton>
+						</div>
+					
+					</div>
+					
+					<div style="clear:both;" />
+				</div>
+			</a4j:repeat>
+		</h:panelGroup>
+	</h:panelGroup>
+	
+	<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_CONDICOES')}">
+		<div style="margin-top: 10px;">
+			<div><h3>Condicoes Para Retorno:</h3></div>
+		</div>
+		
+		<div>
+			<div>
+				<div style="float: left; width: 105px;">
+					<a4j:commandButton
+						action="#{geradorDeRelatorio.limparCondicaoRetorno()}"
+						value="Limpar Formula" 
+						disabled="#{geradorDeRelatorio.disabled('BTT_LIMPAR_CONSULTA_AVANCADO')}"
+						render="@all">
+						
+					</a4j:commandButton>
+				</div>
+				<div style="float: left; width: 115px;">
+					<a4j:commandButton
+						action="#{geradorDeRelatorio.desfazerCondicaoRetorno()}"
+						value="Desfazer Formula" 
+						disabled="#{geradorDeRelatorio.disabled('BTT_DESFAZER_CONSULTA_AVANCADO')}"
+						render="@all">
+						
+					</a4j:commandButton>
+				</div>
+				<div style="float: left; width: 120px;">
+					<a4j:commandButton
+						action="#{geradorDeRelatorio.refazerCondicaoRetorno()}"
+						value="Refazer Formula"
+						disabled="#{geradorDeRelatorio.disabled('BTT_REFAZER_CONSULTA_AVANCADO')}"
+						render="@all">
+						
+					</a4j:commandButton>
+				</div>
+			</div>
+			
+			<div style="clear:both;" />
+			
+			<div style="float: left; width: 210px;">
+				<div>
+					Campo
+				</div>
+				<div>
+					<h:selectOneMenu
+						id="campoCondicoes"
+						style="width: 200px;"
+						disabled="#{geradorDeRelatorio.disabled('TXT_CAMPO_CONSULTA_RETORNO')}"
+						value="#{geradorDeRelatorio.form.campoCondicaoRetorno}">
+						<f:converter converterId="selectItemConversorGR"/>
+						<f:selectItems value="#{geradorDeRelatorio.form.camposView}" />
+						<f:ajax execute="campoCondicoes" render="@all" />
+					</h:selectOneMenu>
+				</div>
+			</div>
+			<div style="float: left; width: 120px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value="Adicionar Campo" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_ADICIONAR_CAMPO_CONDICOES')}"
+					style="margin-top: 17px; width: 100px;"
+					render="@all">
+					
+				</a4j:commandButton>
+			</div>
+			<div style="float: left; width: 210px;">
+				<div>
+					Operador
+				</div>
+				<div>
+					<h:selectOneMenu
+						id="operador"
+						style="width: 200px;"
+						disabled="#{geradorDeRelatorio.disabled('TXT_OPERADOR_CONSULTA_RETORNO')}"
+						value="#{geradorDeRelatorio.form.operadoresCondicaoRetorno}">
+						<f:converter converterId="selectItemConversorGR"/>
+						<f:selectItems value="#{geradorDeRelatorio.form.operadores}" />
+						<f:ajax execute="operador" render="@all" />
+					</h:selectOneMenu>
+				</div>
+			</div>
+			<div style="float: left; width: 160px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value="Adicionar Operador" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_OPERADOR_CONSULTA_RETORNO')}"
+					style="margin-top: 17px; width: 150px;"
+					render="@all">
+											
+				</a4j:commandButton>
+			</div>
+			
+			<div style="float: left; width: 20px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value="(" 
+					style="margin-top: 17px"
+					disabled="#{geradorDeRelatorio.disabled('BTT_ABRIR_PARENTESES')}"
+					render="@all">
+					<f:setPropertyActionListener target="#{geradorDeRelatorio.form.abrirParenteses}" value="true"/>
+				</a4j:commandButton>
+			</div>
+		</div>
+		
+		<div style="clear:both;" />
+		
+		<div>
+			<div style="float: left; width: 210px;">
+				<div>
+					Valor
+				</div>
+				<div>
+					<h:inputText
+						id="valorMutavelConsultaRetorno"
+						style="width: 200px;"
+						value="#{geradorDeRelatorio.form.valorMutavelConsultaRetorno}"
+						disabled="#{geradorDeRelatorio.disabled('TXT_VALOR_MUTAVEL_CONSULTA_RETORNO')}">
+						<f:ajax execute="valorMutavelConsultaRetorno" render="@all" />
+					</h:inputText>
+				</div>
+			</div>
+			<div style="float: left; width: 120px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value="Adicionar Valor" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_VALOR_MUTAVEL_CONSULTA_RETORNO')}"
+					style="margin-top: 17px; width: 100px;"
+					render="@all">
+											
+				</a4j:commandButton>
+			</div>
+			
+			<div style="float: left; width: 210px;">
+				<div>
+					Operador Logico
+				</div>
+				<div>
+					<h:selectOneMenu
+						id="operadorLogico"
+						style="width: 200px;"
+						disabled="#{geradorDeRelatorio.disabled('TXT_OPERADOR_LOGICO_CONSULTA_RETORNO')}"
+						value="#{geradorDeRelatorio.form.operadorLogicoCondicaoRetorno}">
+						<f:converter converterId="selectItemConversorGR"/>
+						<f:selectItems value="#{geradorDeRelatorio.form.operadoresLogicos}" />
+						<f:ajax execute="operadorLogico" render="@all" />
+					</h:selectOneMenu>
+				</div>
+			</div>
+			<div style="float: left; width: 160px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value="Adicionar Operador Logico" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_OPERADOR_LOGICO_CONSULTA_RETORNO')}"
+					style="margin-top: 17px; width: 150px;"
+					render="@all">
+											
+				</a4j:commandButton>
+			</div>
+			
+			<div style="float: left; width: 20px; margin-left: 10px">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.adicionarItemFormulaCondicaoRetorno()}"
+					value=")" 
+					style="margin-top: 17px"
+					disabled="#{geradorDeRelatorio.disabled('BTT_FECHAS_PARENTESES')}"
+					render="@all">
+					<f:setPropertyActionListener target="#{geradorDeRelatorio.form.fecharParenteses}" value="true"/>
+				</a4j:commandButton>
+			</div>
+		</div>
+		
+		<div style="clear:both;" />
+								
+		<div style="margin-top: 15px; width: 1000px; word-wrap: break-word;">
+			<div>
+				Formula Geral
+				<h:panelGroup rendered="#{geradorDeRelatorio.rendered('FORMULA_COM_ERRO')}" style="color: #F00;">
+					<span>( <h:outputText value="#{geradorDeRelatorio.form.msgErroformulaCondicaoRetorno}" /> )</span>
+				</h:panelGroup>
+			</div>
+			<div>
+				<a4j:repeat
+					var="item"
+					value="#{geradorDeRelatorio.form.formulaCondicaoRetorno}">
+					<h:outputText value="#{item}"/>
+				</a4j:repeat>
+			</div>
+		</div>
+		
+		<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_INFORMACOES_ARQUIVO')}">
+			<div style="margin-top: 10px;">
+				<div><h3>Informacoes Arquivo:</h3></div>
+			</div>
+			
+			<div style="float: left; width: 210px;">
+				<div>
+					Extensao *
+				</div>
+				<div>
+					<h:selectOneMenu
+						id="extensao"
+						style="width: 200px;"
+						disabled="#{geradorDeRelatorio.disabled('EXTENSAO')}"
+						value="#{geradorDeRelatorio.form.fullPathClassGerador}">
+						<f:converter converterId="selectItemConversorGR"/>
+						<f:selectItems value="#{geradorDeRelatorio.form.geradores}" />
+						<f:ajax execute="extensao" render="@all" />
+					</h:selectOneMenu>
+				</div>
+			</div>
+			<div style="float: left; width: 210px;">
+				<div>
+					Nome Arquivo *
+				</div>
+				<div>
+					<h:inputText
+						id="nomeArquivo"
+						style="width: 200px;"
+						value="#{geradorDeRelatorio.form.nomeArquivo}"
+						disabled="#{geradorDeRelatorio.disabled('NOME_ARQUIVO')}">
+						<f:ajax execute="nomeArquivo" render="@all" />
+					</h:inputText>
+				</div>
+			</div>
+		</h:panelGroup>
+	
+	</h:panelGroup>
+	
+	<div style="clear:both;" />
+	
+	<h:panelGroup rendered="#{geradorDeRelatorio.rendered('PANEL_BOTOES')}">
+		<div style="margin-top: 15px;">
+			<div style="float: left; width: 70px;">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.cancelar()}"
+					value="Cancelar" 
+					render="@all">
+					
+				</a4j:commandButton>
+			</div>
+		</div>
+		<div style="margin-top: 15px;">
+			<div style="float: left; width: 115px;">
+				<a4j:commandButton
+					action="#{geradorDeRelatorio.gerarRelatorio()}"
+					value="Gerar Relatorio" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_GERAR_RELATORIO')}"
+					render="@all">
+					
+				</a4j:commandButton>
+			</div>
+		</div>
+		<div style="margin-top: 15px;">
+			<div style="float: left; width: 115px;">
+				<h:commandLink
+					action="#{geradorDeRelatorio.download()}"
+					value="Baixar" 
+					disabled="#{geradorDeRelatorio.disabled('BTT_BAIXAR_RELATORIO')}">
+
+				</h:commandLink>
+			</div>
+		</div>
+	</h:panelGroup>
+	
+	
+	<a4j:status
+	    onstart="#{rich:component('procesoEsperaPopupPanel')}.show(); return false;"
+	    onstop="#{rich:component('procesoEsperaPopupPanel')}.hide(); return false;">
+	</a4j:status>
+	
+	<rich:popupPanel id="procesoEsperaPopupPanel" autosized="true" moveable="true">
+	    Aguarde
+	</rich:popupPanel>
+	
+</ui:composition>

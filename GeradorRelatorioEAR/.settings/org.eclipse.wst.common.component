@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="GeradorRelatorioEAR">
+        <wb-resource deploy-path="/" source-path="/EarContent" tag="defaultRootSource"/>
+        <dependent-module archiveName="GeradorRelatorio.jar" deploy-path="/" handle="module:/resource/GeradorRelatorio/GeradorRelatorio">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="GeradorRelatorioCore.jar" deploy-path="/lib" handle="module:/resource/GeradorRelatorioCore/GeradorRelatorioCore">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>
